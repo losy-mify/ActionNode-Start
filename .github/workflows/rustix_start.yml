@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+
       - name: 📥 下载私库脚本
         uses: actions/checkout@v4
         with:
@@ -58,8 +59,7 @@ jobs:
       - name: 🚀 运行启动脚本
         env:
           PYTHONIOENCODING: utf-8
-          # ── 关键修改点 ──
-          RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT: ${{ secrets.TG_BOT }}
         run: |
