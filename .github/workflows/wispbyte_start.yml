@@ -1,8 +1,6 @@
 name: Wispbyte-Start
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *'   # 可按需调整，或删除此行只保留手动触发
 
 jobs:
   run_wispbyte_start:
