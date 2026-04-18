@@ -1,4 +1,4 @@
-name: Rustix-Start
+name: Wispbyte-Start
 
 on:
   workflow_dispatch:
