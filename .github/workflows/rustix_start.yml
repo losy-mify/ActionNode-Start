@@ -29,6 +29,7 @@ jobs:
           tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
           chmod +x gost
           PROXY=$(echo "$RUSTIX_ACCOUNT" | cut -d',' -f3)
+          echo "📡 上游代理：$PROXY"
           nohup ./gost -L http://:8080 -F "$PROXY" > gost.log 2>&1 &
           sleep 3
           echo "✅ GOST 已启动，测试连通性..."
