@@ -30,6 +30,8 @@ jobs:
           chmod +x gost
           nohup ./gost -L http://:8080 -F "$RUSTIX_PROXY" > gost.log 2>&1 &
           sleep 3
+          echo "=== GOST 日志 ==="
+          cat gost.log
           echo "✅ GOST 已启动，测试连通性..."
           curl -v -x http://127.0.0.1:8080 https://api.ipify.org 2>&1 || true
         env:
