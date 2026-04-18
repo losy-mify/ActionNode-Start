@@ -48,7 +48,6 @@ jobs:
         env:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
           TG_BOT:         ${{ secrets.TG_BOT }}
-          GOST_PROXY:     http://127.0.0.1:8080
         run: npx playwright test tests/rustix_start.spec.js
 
       - name: 📸 上传失败截图
