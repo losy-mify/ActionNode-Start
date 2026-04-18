@@ -28,14 +28,12 @@ jobs:
           wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
           tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
           chmod +x gost
-          PROXY=$(echo "$RUSTIX_ACCOUNT" | cut -d',' -f3)
-          echo "📡 上游代理：$PROXY"
-          nohup ./gost -L http://:8080 -F "$PROXY" > gost.log 2>&1 &
+          nohup ./gost -L http://:8080 -F "$RUSTIX_PROXY" > gost.log 2>&1 &
           sleep 3
           echo "✅ GOST 已启动，测试连通性..."
           curl -v -x http://127.0.0.1:8080 https://api.ipify.org 2>&1 || true
         env:
-          RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
+          RUSTIX_PROXY: ${{ secrets.RUSTIX_PROXY }}
       - name: 🚀 运行启动脚本
         env:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
