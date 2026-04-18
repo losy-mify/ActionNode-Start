@@ -1,4 +1,4 @@
-name: 🎮 Rustix 自动启动
+name: Rustix-Start
 
 on:
   schedule:
