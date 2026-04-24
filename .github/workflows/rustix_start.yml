@@ -12,14 +12,16 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/ActionNode-Start-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
-      - name: 🟢 安装 Node.js
-        uses: actions/setup-node@v4
+
+      - name: 🐍 安装 Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '22'
+          python-version: '3.11'
+
       - name: 📦 安装依赖
-        run: npm install
-      - name: 🌐 安装 Playwright 浏览器
-        run: npx playwright install chromium --with-deps
+        run: |
+          pip install seleniumbase
+
       - name: 🛡️ 启动 GOST 代理转发
         run: |
           VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
@@ -36,12 +38,14 @@ jobs:
           curl -v --socks5 127.0.0.1:1080 https://api.ipify.org 2>&1 || true
         env:
           RUSTIX_PROXY: ${{ secrets.RUSTIX_PROXY }}
+
       - name: 🚀 运行启动脚本
         env:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
           TG_BOT:         ${{ secrets.TG_BOT }}
           GOST_PROXY:     socks5://127.0.0.1:1080
-        run: npx playwright test tests/rustix_start.spec.js
+        run: python rustix_start.py
+
       - name: 📸 上传失败截图
         if: failure()
         uses: actions/upload-artifact@v4
