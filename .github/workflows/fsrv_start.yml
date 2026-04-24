@@ -1,4 +1,4 @@
-name: FSRV 启动任务
+name: FSRV-Start
 
 on:
   workflow_dispatch:
