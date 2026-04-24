@@ -1,12 +1,10 @@
-name: MagmaNode-Renew
+name: Magma-Start
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 1 * * *'   # 每天 UTC 01:00 (北京时间 09:00) 运行
 
 jobs:
-  run_magmanode_renew:
+  run_magma_start:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -19,7 +17,7 @@ jobs:
           path: private
 
       - name: 📂 移动脚本到工作目录
-        run: mv private/magmanode_renew.py magmanode_renew.py
+        run: mv private/magma_start.py magma_start.py
 
       - name: 🐍 设置 Python
         uses: actions/setup-python@v5
@@ -57,14 +55,14 @@ jobs:
           IP_MASKED=$(echo "$IP" | sed 's/\([0-9]*\.[0-9]*\.[0-9]*\.\)[0-9]*/\1xxx/')
           echo "✅ GOST 已启动，出口IP：$IP_MASKED"
 
-      - name: 🚀 运行维护脚本
+      - name: 🚀 运行启动脚本
         env:
           PYTHONIOENCODING: utf-8
-          MAGMANODE_ACCOUNT: ${{ secrets.MAGMANODE_ACCOUNT }}
+          MAGMA_ACCOUNT: ${{ secrets.MAGMA_ACCOUNT }}
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT: ${{ secrets.TG_BOT }}
         run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python magmanode_renew.py
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python magma_start.py
 
       - name: 📸 上传调试截图
         if: always()
