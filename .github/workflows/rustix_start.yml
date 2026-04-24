@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
 
       - name: 📦 安装依赖
-        run: pip install requests
+        run: pip install requests seleniumbase
 
       - name: 🛡️ 启动 GOST 代理转发
         run: |
