@@ -5,7 +5,7 @@ jobs:
   start:
     name: 🚀 启动服务器
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 3
     steps:
       - name: 📥 拉取私库代码
         uses: actions/checkout@v4
@@ -53,7 +53,7 @@ jobs:
         run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python rustix_start.py
         
       - name: 📸 上传失败日志
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: failure-logs
