@@ -3,10 +3,11 @@ name: GameServer-Start
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 25 4 *'  # 由脚本自动维护，请勿手动修改此行
+    - cron: '0 8 25 5 *'  # 由脚本自动维护，请勿手动修改此行
 
 permissions:
-  contents: write  # 允许脚本 commit & push 回写 cron
+  contents: write   # 允许脚本 commit & push 回写 cron
+  workflows: write  # 允许修改 .github/workflows/ 下的文件
 
 jobs:
   run_gameserver_start:
@@ -72,10 +73,8 @@ jobs:
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT: ${{ secrets.TG_BOT }}
           WORKFLOW_YML_PATH: .github/workflows/gameserver_start.yml
-          # 供脚本 git push 使用
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 配置 git remote 带 token，确保脚本可以 push
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python gameserver_start.py
 
