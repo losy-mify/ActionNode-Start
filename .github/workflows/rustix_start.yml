@@ -5,29 +5,19 @@ jobs:
   start:
     name: 🚀 启动服务器
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - name: 📥 拉取私库代码
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/ActionNode-Start-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
-          
-      - name: 🛠️ 安装系统依赖
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable xvfb x11-utils
-          
       - name: 🐍 安装 Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
       - name: 📦 安装依赖
-        run: |
-          pip install seleniumbase
-          seleniumbase install chromedriver
-          
+        run: pip install requests websocket-client
       - name: 🛡️ 启动 GOST 代理转发
         run: |
           VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
@@ -41,28 +31,19 @@ jobs:
           echo "=== GOST 日志 ==="
           cat gost.log
           echo "✅ GOST 已启动，测试连通性..."
-          curl -v --proxy http://127.0.0.1:8080 https://api.ipify.org 2>&1 || true
+          curl -s --proxy http://127.0.0.1:8080 https://api.ipify.org
         env:
           RUSTIX_PROXY: ${{ secrets.RUSTIX_PROXY }}
-
-      - name: 🔍 测试 Rustix API
-        run: |
-          curl -s -x http://127.0.0.1:8080 \
-            -H "Authorization: Bearer ptlc_sWZwPmVxKUp2eS1SgaZwy912JLjK0kiF9bEcMwn8Ft4" \
-            -H "Accept: application/json" \
-            https://my.rustix.me/api/client/servers/5fdf8685
-          
       - name: 🚀 运行启动脚本
         env:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
           TG_BOT:         ${{ secrets.TG_BOT }}
           GOST_PROXY:     http://127.0.0.1:8080
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python rustix_start.py
-        
-      - name: 📸 上传失败日志
+        run: python rustix_start.py
+      - name: 📸 上传日志
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: failure-logs
+          name: logs
           path: "*.png"
           retention-days: 7
