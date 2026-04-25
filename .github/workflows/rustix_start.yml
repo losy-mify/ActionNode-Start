@@ -44,6 +44,13 @@ jobs:
           curl -v --proxy http://127.0.0.1:8080 https://api.ipify.org 2>&1 || true
         env:
           RUSTIX_PROXY: ${{ secrets.RUSTIX_PROXY }}
+
+      - name: 🔍 测试 Rustix API
+        run: |
+          curl -s -x http://127.0.0.1:8080 \
+            -H "Authorization: Bearer ptlc_sWZwPmVxKUp2eS1SgaZwy912JLjK0kiF9bEcMwn8Ft4" \
+            -H "Accept: application/json" \
+            https://my.rustix.me/api/client/servers/5fdf8685
           
       - name: 🚀 运行启动脚本
         env:
