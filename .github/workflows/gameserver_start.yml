@@ -1,11 +1,24 @@
 name: GameServer-Start
+
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 8 25 4 *'  # 由脚本自动维护，请勿手动修改此行
+
+permissions:
+  contents: write  # 允许脚本 commit & push 回写 cron
 
 jobs:
   run_gameserver_start:
     runs-on: ubuntu-latest
+
     steps:
+      - name: 📥 检出当前仓库（用于回写 cron）
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: current_repo
+
       - name: 📥 下载私库脚本
         uses: actions/checkout@v4
         with:
@@ -14,7 +27,7 @@ jobs:
           path: private
 
       - name: 📂 移动脚本到工作目录
-        run: mv private/gameserver_start.py gameserver_start.py
+        run: mv private/gameserver_start.py current_repo/gameserver_start.py
 
       - name: 🐍 设置 Python
         uses: actions/setup-python@v4
@@ -52,13 +65,18 @@ jobs:
           seleniumbase install chromedriver
 
       - name: 🚀 运行脚本
+        working-directory: current_repo
         env:
           PYTHONIOENCODING: utf-8
-          # 注意：在 Repo Secrets 中添加 GS_ACCOUNT
           GS_ACCOUNT: ${{ secrets.GS_ACCOUNT }}
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT: ${{ secrets.TG_BOT }}
+          WORKFLOW_YML_PATH: .github/workflows/gameserver_start.yml
+          # 供脚本 git push 使用
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # 配置 git remote 带 token，确保脚本可以 push
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python gameserver_start.py
 
       - name: 📸 上传截图
@@ -66,4 +84,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: debug-screenshots
-          path: "*.png"
+          path: "current_repo/*.png"
