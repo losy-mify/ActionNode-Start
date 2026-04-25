@@ -12,15 +12,22 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/ActionNode-Start-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
-
+          
+      - name: 🛠️ 安装系统依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable xvfb x11-utils
+          
       - name: 🐍 安装 Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
+          
       - name: 📦 安装依赖
-        run: pip install requests seleniumbase
-
+        run: |
+          pip install seleniumbase
+          seleniumbase install chromedriver
+          
       - name: 🛡️ 启动 GOST 代理转发
         run: |
           VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
@@ -29,26 +36,26 @@ jobs:
           wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
           tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
           chmod +x gost
-          nohup ./gost -L socks5://:1080 -L http://:1081 -F "$RUSTIX_PROXY" > gost.log 2>&1 &
+          nohup ./gost -L http://:8080 -F "$RUSTIX_PROXY" > gost.log 2>&1 &
           sleep 3
           echo "=== GOST 日志 ==="
           cat gost.log
           echo "✅ GOST 已启动，测试连通性..."
-          curl -v --proxy http://127.0.0.1:1081 https://api.ipify.org 2>&1 || true
+          curl -v --proxy http://127.0.0.1:8080 https://api.ipify.org 2>&1 || true
         env:
           RUSTIX_PROXY: ${{ secrets.RUSTIX_PROXY }}
-
+          
       - name: 🚀 运行启动脚本
         env:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
           TG_BOT:         ${{ secrets.TG_BOT }}
-          GOST_PROXY:     http://127.0.0.1:1081
-        run: python rustix_start.py
-
+          GOST_PROXY:     http://127.0.0.1:8080
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python rustix_start.py
+        
       - name: 📸 上传失败日志
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: failure-logs
-          path: test-results/
+          path: "*.png"
           retention-days: 7
