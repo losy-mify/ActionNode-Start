@@ -26,6 +26,7 @@ jobs:
           pip install playwright playwright-stealth
           playwright install chromium
           playwright install-deps chromium
+          sudo apt-get install -y xvfb
 
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
@@ -49,7 +50,7 @@ jobs:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
           TG_BOT:         ${{ secrets.TG_BOT }}
           GOST_PROXY:     http://127.0.0.1:8080
-        run: python rustix_start.py
+        run: xvfb-run --auto-servernum python rustix_start.py
 
       - name: 📸 上传失败日志
         if: failure()
