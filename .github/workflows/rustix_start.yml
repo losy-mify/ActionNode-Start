@@ -50,7 +50,7 @@ jobs:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
           TG_BOT:         ${{ secrets.TG_BOT }}
           GOST_PROXY:     http://127.0.0.1:8080
-        run: xvfb-run --auto-servernum python rustix_start.py
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" python rustix_start.py
 
       - name: 📸 上传失败日志
         if: failure()
