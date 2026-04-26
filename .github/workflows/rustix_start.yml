@@ -23,9 +23,7 @@ jobs:
 
       - name: 📦 安装依赖
         run: |
-          pip install playwright playwright-stealth
-          playwright install chromium
-          playwright install-deps chromium
+          pip install undetected-chromedriver selenium
           sudo apt-get install -y xvfb
 
       - name: 🛡️ 启动 GOST 代理转发
