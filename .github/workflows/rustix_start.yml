@@ -48,7 +48,7 @@ jobs:
         env:
           RUSTIX_ACCOUNT: ${{ secrets.RUSTIX_ACCOUNT }}
           TG_BOT:         ${{ secrets.TG_BOT }}
-          GOST_PROXY:     http://127.0.0.1:1081
+          GOST_PROXY:     http://127.0.0.1:8080
         run: python rustix_start.py
 
       - name: 📸 上传失败日志
