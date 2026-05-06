@@ -16,13 +16,13 @@ jobs:
       - name: 📥 下载私库脚本
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/ZO-Awaken-Private
+          repository: ${{ github.repository_owner }}/ActionNode-Start-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           path: private
 
       # ── 2. 移动脚本到工作目录 ─────────────────────────────────
       - name: 📂 移动脚本到工作目录
-        run: mv private/zo-awaken.py zo-awaken.py
+        run: mv private/zo_awaken.py zo_awaken.py
 
       # ── 3. 设置 Python ────────────────────────────────────────
       - name: 🐍 设置 Python
@@ -66,7 +66,7 @@ jobs:
           TG_BOT: ${{ secrets.TG_BOT }}
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
         run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python zo-awaken.py
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python zo_awaken.py
 
       # ── 8. 上传截图与源码 ─────────────────────────────────────
       - name: 📸 上传截图与源码
