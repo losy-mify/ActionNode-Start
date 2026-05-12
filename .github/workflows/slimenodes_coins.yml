@@ -39,7 +39,7 @@ jobs:
           pip install seleniumbase
           seleniumbase install chromedriver
 
-      - name: 🛡️ 启动 GOST 代理
+      - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
         env:
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
@@ -52,8 +52,9 @@ jobs:
           chmod +x gost
           nohup ./gost -L http://:8080 -F "$GOST_PROXY" > gost.log 2>&1 &
           sleep 3
-          echo "✅ GOST 已启动"
-          echo "GOST_PROXY=http://127.0.0.1:8080" >> $GITHUB_ENV
+          echo "✅ GOST 已启动，测试连通性..."
+          curl -s -x http://127.0.0.1:8080 https://api.ipify.org \
+            | sed 's/\([0-9]*\.[0-9]*\.[0-9]*\.\)[0-9]*/\1**/g'
 
       - name: 🚀 运行领取脚本
         env:
