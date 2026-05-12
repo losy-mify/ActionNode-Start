@@ -53,18 +53,17 @@ jobs:
           nohup ./gost -L http://:8080 -F "$GOST_PROXY" > gost.log 2>&1 &
           sleep 3
           echo "✅ GOST 已启动"
-          echo "GOST_PROXY_URL=http://127.0.0.1:8080" >> $GITHUB_ENV
+          echo "GOST_PROXY=http://127.0.0.1:8080" >> $GITHUB_ENV
 
       - name: 🚀 运行领取脚本
         env:
           PYTHONIOENCODING: utf-8
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-          TG_BOT:        ${{ secrets.TG_BOT }}
+          DISCORD_TOKEN:  ${{ secrets.DISCORD_TOKEN }}
+          TG_BOT:         ${{ secrets.TG_BOT }}
+          GOST_PROXY:     ${{ env.GOST_PROXY }}
         run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
-            python slimenodes_coins.py 2>&1 | tee run.log
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python slimenodes_coins.py
 
-      # ── 推回私库 ──────────────────────────────────────────────────
       - name: 📤 推回私库（如有 Cookie 更新）
         if: always()
         env:
@@ -83,19 +82,10 @@ jobs:
             echo "ℹ️ Cookie 无变化，无需推送"
           fi
 
-      # ── 调试产物 ──────────────────────────────────────────────────
       - name: 📸 上传调试截图
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-${{ github.run_id }}
           path: "*.png"
-          retention-days: 3
-
-      - name: 📋 上传运行日志
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: logs-${{ github.run_id }}
-          path: "run.log"
           retention-days: 3
