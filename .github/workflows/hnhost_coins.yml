@@ -1,8 +1,6 @@
 name: HnHost-Coins
-
 on:
   workflow_dispatch:
-
 jobs:
   hnhost_coins:
     runs-on: ubuntu-latest
@@ -19,10 +17,13 @@ jobs:
         run: cp private/hnhost_coins.js hnhost_coins.js
 
       - name: 🛡️ 启动 GOST 代理
-        if: ${{ env.GOST_PROXY != '' }}
         env:
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
         run: |
+          if [ -z "$GOST_PROXY" ]; then
+            echo "🌐 未配置 GOST_PROXY，跳过代理启动"
+            exit 0
+          fi
           VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
             | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
           echo "📦 GOST 版本: $VERSION"
@@ -30,20 +31,16 @@ jobs:
           tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
           chmod +x gost
           nohup ./gost -L http://:8080 -F "$GOST_PROXY" > gost.log 2>&1 &
-          sleep 3
+          sleep 5
           echo "✅ GOST 已启动，测试连通性..."
           curl -s -x http://127.0.0.1:8080 https://api.ipify.org | sed 's/\.[0-9]*$/.**/' && echo
 
       - name: 📦 安装依赖
-        run: |
-          cd private
-          npm install https-proxy-agent 2>/dev/null || true
-          cp -r node_modules ../node_modules 2>/dev/null || true
+        run: npm install https-proxy-agent
 
       - name: 🔧 执行领取任务
         env:
-          # 多账号换行写入，格式：账号名,Discord_Token
           HNHOST_ACCOUNT: ${{ secrets.HNHOST_ACCOUNT }}
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
-          TG_BOT:     ${{ secrets.TG_BOT }}
+          TG_BOT: ${{ secrets.TG_BOT }}
         run: node hnhost_coins.js
