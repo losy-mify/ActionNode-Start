@@ -12,12 +12,12 @@ jobs:
       - name: 📥 拉取私库脚本
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/CopperNodes-Private
+          repository: ${{ github.repository_owner }}/ActionNode-Start-Private
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           path: private
 
       - name: 📂 复制脚本到工作目录
-        run: cp private/coppernodes.js coppernodes.js
+        run: cp private/copper_coins.js copper_coins.js
 
       - name: 🛡️ 启动 GOST 代理
         if: ${{ env.GOST_PROXY != '' }}
@@ -47,20 +47,20 @@ jobs:
           COPPER_ACCOUNT: ${{ secrets.COPPER_ACCOUNT }}
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT:     ${{ secrets.TG_BOT }}
-        run: node coppernodes.js
+        run: node copper_coins.js
 
       - name: 📤 推回私库（如有 Cookie 更新）
         env:
           PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
         run: |
-          cp coppernodes.js private/coppernodes.js
+          cp coppernodes.js private/copper_coins.js
           cd private
           if ! git diff --quiet; then
             git config user.email "actions@github.com"
             git config user.name "GitHub Actions"
-            git add coppernodes.js
+            git add copper_coins.js
             git commit -m "🔄 自动更新 Cookie"
-            git push "https://${PRIVATE_REPO_TOKEN}@github.com/${{ github.repository_owner }}/CopperNodes-Private.git" HEAD
+            git push "https://${PRIVATE_REPO_TOKEN}@github.com/${{ github.repository_owner }}/ActionNode-Start-Private.git" HEAD
             echo "✅ Cookie 已推回私库"
           else
             echo "ℹ️ Cookie 无变化，无需推送"
