@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  earn:
+  copper_coins:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
