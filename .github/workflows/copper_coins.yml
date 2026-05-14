@@ -53,7 +53,7 @@ jobs:
         env:
           PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
         run: |
-          cp coppernodes.js private/copper_coins.js
+          cp copper_coins.js private/copper_coins.js
           cd private
           if ! git diff --quiet; then
             git config user.email "actions@github.com"
