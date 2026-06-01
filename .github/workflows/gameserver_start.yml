@@ -1,19 +1,23 @@
 name: GameServer-Start
+
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 8 25 5 *'  # 由脚本自动维护，请勿手动修改此行
+
 permissions:
   contents: write
   actions: write
+
 jobs:
   run_gameserver_start:
     runs-on: ubuntu-latest
+
     steps:
       - name: 📥 检出当前仓库（用于回写 cron）
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
           path: current_repo
 
       - name: 📥 下载私库脚本
@@ -60,5 +64,4 @@ jobs:
           TG_BOT: ${{ secrets.TG_BOT }}
           WORKFLOW_YML_PATH: .github/workflows/gameserver_start.yml
         run: |
-          git remote set-url origin https://x-access-token:${{ secrets.PRIVATE_REPO_TOKEN }}@github.com/${{ github.repository }}.git
           python gameserver_start.py
