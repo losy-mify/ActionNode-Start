@@ -1,18 +1,13 @@
 name: GameServer-Start
-
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 8 25 5 *'  # 由脚本自动维护，请勿手动修改此行
 
 permissions:
-  contents: write    # 允许 git commit & push
-  actions: write     # 允许 GitHub Actions 对 workflow 进行写操作（替换原来的 workflows: write）
-
+  contents: write
+  actions: write
 jobs:
   run_gameserver_start:
     runs-on: ubuntu-latest
-
     steps:
       - name: 📥 检出当前仓库（用于回写 cron）
         uses: actions/checkout@v4
@@ -33,9 +28,9 @@ jobs:
       - name: 🐍 设置 Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
-      - name: 🛡️ 启动 GOST 代理转发 (可选)
+      - name: 🛡️ 启动 GOST 代理转发（可选）
         if: ${{ env.GOST_PROXY != '' }}
         env:
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
@@ -52,18 +47,8 @@ jobs:
           curl -s -x http://127.0.0.1:8080 https://api.ipify.org \
             | sed 's/\([0-9]*\.[0-9]*\.[0-9]*\.\)[0-9]*/\1**/g'
 
-      - name: 🛠️ 安装系统依赖
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            google-chrome-stable \
-            xvfb \
-            x11-utils
-
       - name: 🐍 安装 Python 依赖
-        run: |
-          pip install seleniumbase
-          seleniumbase install chromedriver
+        run: pip install websockets
 
       - name: 🚀 运行脚本
         working-directory: current_repo
@@ -73,14 +58,6 @@ jobs:
           GOST_PROXY: ${{ secrets.GOST_PROXY }}
           TG_BOT: ${{ secrets.TG_BOT }}
           WORKFLOW_YML_PATH: .github/workflows/gameserver_start.yml
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python gameserver_start.py
-
-      - name: 📸 上传截图
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-screenshots
-          path: "current_repo/*.png"
+          python gameserver_start.py
