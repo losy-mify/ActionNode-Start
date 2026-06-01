@@ -3,7 +3,7 @@ name: GameServer-Start
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 25 5 *'  # 由脚本自动维护，请勿手动修改此行
+    - cron: '0 8 3 6 *'  # 由脚本自动维护，请勿手动修改此行
 
 permissions:
   contents: write
