@@ -1,6 +1,8 @@
 name: Wispbyte-Start
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 */3 * *'
 
 jobs:
   run_wispbyte_start:
