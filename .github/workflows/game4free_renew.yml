@@ -2,7 +2,7 @@ name: Game4Free-Renew
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'   # 每天 UTC 02:00 自动运行
+    - cron: '0 1 * * *'   # 每天 UTC 02:00 自动运行
 
 jobs:
   renew:
