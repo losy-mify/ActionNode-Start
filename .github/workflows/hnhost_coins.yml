@@ -1,11 +1,11 @@
 name: HNHost-Coins
 on:
   workflow_dispatch:
+  
 jobs:
   checkin:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    
     steps:
       - name: 📥 拉取私库脚本
         uses: actions/checkout@v4
