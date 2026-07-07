@@ -1,13 +1,15 @@
 name: Game4Free-Renew
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 1 * * *'
 
 jobs:
   renew:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      actions: write
+      contents: read
+      
     steps:
       - name: 📥 下载私库脚本
         uses: actions/checkout@v4
@@ -24,35 +26,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 📦 下载 GOST
-        run: |
-          VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest \
-            | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
-          echo "📦 GOST 版本: $VERSION"
-          wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
-          tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
-          chmod +x gost
-
-      - name: 🛠️ 安装系统依赖
+      - name: 🛠️ 安装系统依赖和 Python 依赖
         run: |
           sudo apt-get update -q
           sudo apt-get install -y \
             google-chrome-stable \
-            xvfb \
-            xdotool
+            xvfb x11-utils xdotool scrot fonts-noto-cjk jq wget
+          pip install seleniumbase requests
+          seleniumbase install chromedriver
 
-      - name: 🐍 安装 Python 依赖
-        run: pip install seleniumbase
-
-      - name: 🔧 安装 ChromeDriver
-        run: seleniumbase install chromedriver
+      - name: ⚙️ 设置代理 (sing-box)
+        env:
+          NODE_LINK: ${{ secrets.NODE_LINK }}
+        run: |
+          bash <(wget -qO- https://main.ssss.nyc.mn/setup_proxy.sh)
 
       - name: 🚀 运行续期脚本
         env:
           PYTHONIOENCODING: utf-8
           TG_BOT: ${{ secrets.TG_BOT }}
           GAME4FREE_ACCOUNT: ${{ secrets.GAME4FREE_ACCOUNT }}
-          GAME4FREE_PROXY: ${{ secrets.GAME4FREE_PROXY }}
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
             python game4free_renew.py
@@ -63,3 +56,27 @@ jobs:
         with:
           name: debug-screenshots
           path: "*.png"
+
+      - name: 🧽 清理进程和临时文件
+        if: always()
+        run: |
+          pkill -f sing-box || true
+          pkill -f chromedriver || true
+          pkill -f chrome || true
+          pkill -f Xvfb || true
+          rm -f sing-box sing-box-config.json sing-box.log
+
+      - name: 🧹 清理旧的工作流运行记录
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          runs=$(gh run list --workflow="${{ github.workflow }}" --limit=100 --json databaseId --jq '.[].databaseId')
+          count=0
+          for run_id in $runs; do
+            count=$((count + 1))
+            if [ $count -gt 1 ]; then
+              echo "删除运行记录: $run_id"
+              gh run delete $run_id || true
+            fi
+          done
