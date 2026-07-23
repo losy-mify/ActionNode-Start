@@ -1,0 +1,59 @@
+name: CloudBlaze-Restart
+
+on:
+  workflow_dispatch:
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 📥 拉取私库脚本
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ActionNode-Start-Private
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          path: private
+
+      - name: 📂 复制脚本到工作目录
+        run: cp private/cloudblaze_restart.sh cloudblaze_restart.sh
+
+      - name: 🛡️ 启动 GOST 代理转发
+        if: ${{ env.CB_GOST_PROXY != '' }}
+        env:
+          CB_GOST_PROXY: ${{ secrets.CB_GOST_PROXY }}
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/ginuerzh/gost/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
+          echo "📦 GOST 版本: $VERSION"
+          wget -q "https://github.com/ginuerzh/gost/releases/download/v${VERSION}/gost_${VERSION}_linux_amd64.tar.gz"
+          tar -xzf "gost_${VERSION}_linux_amd64.tar.gz"
+          chmod +x gost
+          nohup ./gost -L http://:8080 -F "$CB_GOST_PROXY" > gost.log 2>&1 &
+          sleep 3
+          echo "✅ GOST 已启动，测试连通性..."
+          curl -s -x http://127.0.0.1:8080 https://api.ipify.org | sed 's/\([0-9]*\.[0-9]*\.\)[0-9]*\.[0-9]*/\1**.**/g'
+          echo ""
+
+      - name: 🖥️ 执行重启
+        env:
+          CB_ACCOUNT: ${{ secrets.CB_ACCOUNT }}
+          CB_API_KEY: ${{ secrets.CB_API_KEY }}
+          CB_GOST_PROXY: ${{ secrets.CB_GOST_PROXY }}
+        run: bash cloudblaze_restart.sh
+
+      - name: 📤 推回私库（Session 有更新时）
+        if: always()
+        env:
+          PRIVATE_REPO_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+        run: |
+          cd private
+          if ! git diff --quiet; then
+            git config user.email "actions@github.com"
+            git config user.name "GitHub Actions"
+            git add cloudblaze_restart.sh
+            git commit -m "🔄 自动更新 Session [skip ci]"
+            git push "https://${PRIVATE_REPO_TOKEN}@github.com/${{ github.repository_owner }}/ActionNode-Start-Private.git" HEAD
+            echo "✅ Session 已推回私库"
+          else
+            echo "ℹ️ Session 未变化，无需推送"
+          fi
