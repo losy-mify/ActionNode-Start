@@ -36,7 +36,7 @@ jobs:
 
       - name: 🖥️ 执行重启
         env:
-          CB_ACCOUNT: ${{ secrets.CB_COOKIE }}
+          CB_COOKIE: ${{ secrets.CB_COOKIE }}
           CB_API_KEY: ${{ secrets.CB_API_KEY }}
           CB_GOST_PROXY: ${{ secrets.CB_GOST_PROXY }}
         run: bash cloudblaze_restart.sh
