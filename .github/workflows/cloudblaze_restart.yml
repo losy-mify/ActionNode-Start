@@ -1,8 +1,8 @@
 name: CloudBlaze-Restart
-
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: '*/10 * * * *'
 jobs:
   restart:
     runs-on: ubuntu-latest
@@ -18,6 +18,16 @@ jobs:
       - name: 📂 复制脚本到工作目录
         run: cp private/cloudblaze_restart.sh cloudblaze_restart.sh
 
+      - name: 📦 安装 curl-impersonate
+        run: |
+          VERSION="0.6.1"
+          wget -q "https://github.com/lwthiker/curl-impersonate/releases/download/v${VERSION}/curl-impersonate-v${VERSION}.x86_64-linux-gnu.tar.gz"
+          tar -xzf "curl-impersonate-v${VERSION}.x86_64-linux-gnu.tar.gz"
+          sudo mv curl-impersonate-chrome /usr/local/bin/ 2>/dev/null || true
+          sudo mv libcurl-impersonate-chrome.so* /usr/local/lib/ 2>/dev/null || true
+          sudo ldconfig
+          echo "✅ curl-impersonate 已安装"
+
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.CB_GOST_PROXY != '' }}
         env:
@@ -30,9 +40,7 @@ jobs:
           chmod +x gost
           nohup ./gost -L http://:8080 -F "$CB_GOST_PROXY" > gost.log 2>&1 &
           sleep 3
-          echo "✅ GOST 已启动，测试连通性..."
-          curl -s -x http://127.0.0.1:8080 https://api.ipify.org | sed 's/\([0-9]*\.[0-9]*\.\)[0-9]*\.[0-9]*/\1**.**/g'
-          echo ""
+          echo "✅ GOST 已启动"
 
       - name: 🖥️ 执行重启
         env:
