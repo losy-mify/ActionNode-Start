@@ -17,13 +17,6 @@ jobs:
       - name: 📂 复制脚本到工作目录
         run: cp private/hnhost_coins.sh hnhost_coins.sh
 
-      - name: 🌐 安装 curl-impersonate
-        run: |
-          curl -sL https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.1/curl-impersonate-v0.6.1.x86_64-linux-gnu.tar.gz \
-            | tar -xz -C /usr/local/bin
-          chmod +x /usr/local/bin/curl-impersonate-chrome
-          chmod +x /usr/local/bin/curl_chrome110
-
       - name: 🛡️ 启动 GOST 代理转发
         if: ${{ env.GOST_PROXY != '' }}
         env:
